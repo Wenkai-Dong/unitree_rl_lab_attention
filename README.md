@@ -1,3 +1,18 @@
+压缩文件
+```bash
+Compress-Archive -Path "D:\dwk\unitree_rl_lab_reproduction\scripts\rsl_rl\logs","D:\dwk\unitree_rl_lab_reproduction\scripts\rsl_rl\outputs" -DestinationPath "D:\dwk\unitree_rl_lab_reproduction\scripts\rsl_rl\train.zip" -Force
+```
+更新子模块
+```bash
+git submodule update --init --recursive 
+```
+Play
+```bash
+cd scripts/rsl_rl
+```
+```bash
+python scripts/rsl_rl/play.py --num_envs 512 --task 
+```
 # Unitree RL Lab
 
 [![IsaacSim](https://img.shields.io/badge/IsaacSim-5.1.0-silver.svg)](https://docs.omniverse.nvidia.com/isaacsim/latest/overview.html)
@@ -35,7 +50,13 @@ Currently supports Unitree **Go2**, **H1** and **G1-29dof** robots.
     ```bash
     conda activate env_isaaclab
     ./unitree_rl_lab.sh -i
+    cd rsl_rl_attention/
+    pip install -e .
     # restart your shell to activate the environment changes.
+    ```
+    Install shapely
+    ```bash
+    pip install shapely triangle
     ```
 - Download unitree robot description files
 
