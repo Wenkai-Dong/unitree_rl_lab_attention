@@ -52,6 +52,17 @@ def main():
     print(f"[INFO]: Gym action space: {env.action_space}")
     # reset environment
     env.reset()
+    # 打印机器人关节索引，仅环境数量为1时生效
+    if env.env.num_envs == 1:
+        if "robot" in env.unwrapped.scene.keys():
+            robot = env.unwrapped.scene["robot"]
+            all_joint_names = robot.joint_names
+            print(f"\n ====== 机器人关节索引映射表 (Total: {len(all_joint_names)}) ======")
+            for idx, name in enumerate(all_joint_names):
+                print(f"Index {idx}: {name}")
+            print("========================================================\n")
+        else:
+            print("[WARNING] 场景中未找到名为 'robot' 的资产，跳过关节打印。")
     # simulate environment
     while simulation_app.is_running():
         # run everything in inference mode
