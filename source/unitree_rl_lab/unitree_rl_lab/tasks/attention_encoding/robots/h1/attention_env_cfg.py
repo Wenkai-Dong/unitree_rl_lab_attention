@@ -104,16 +104,17 @@ class CommandsCfg:
 
     base_velocity = mdp.UniformLevelVelocityCommandCfg(
         asset_name="robot",
-        resampling_time_range=(8.0, 12.0),
+        heading_command=True,
+        heading_control_stiffness=1.,
         rel_standing_envs=0.02,
         rel_heading_envs=1.0,
-        heading_command=False,
-        debug_vis=True,
         ranges=mdp.UniformLevelVelocityCommandCfg.Ranges(
-            lin_vel_x=(-0.5, 0.5), lin_vel_y=(-0.1, 0.1), ang_vel_z=(-0.1, 0.1)
+            lin_vel_x=(-0.3, 0.5), lin_vel_y=(-0.3, 0.3), ang_vel_z=(-0.3, 0.3), heading=(-math.pi, math.pi)
         ),
+        resampling_time_range=(8.0, 10.0),
+        debug_vis=True,
         limit_ranges=mdp.UniformLevelVelocityCommandCfg.Ranges(
-            lin_vel_x=(-0.5, 1.5), lin_vel_y=(-0.6, 0.6), ang_vel_z=(-1., 1.)
+            lin_vel_x=(-1., 1.5), lin_vel_y=(-1., 1.), ang_vel_z=(-1., 1.), heading=(-math.pi, math.pi)
         ),
     )
 
@@ -302,7 +303,7 @@ class TerminationsCfg:
     """Termination terms for the MDP."""
 
     time_out = DoneTerm(func=mdp.time_out, time_out=True)
-    base_height = DoneTerm(func=mdp.root_height_below_minimum, params={"minimum_height": 0.2})
+    base_height = DoneTerm(func=mdp.root_height_below_minimum, params={"minimum_height": -3})
     bad_orientation = DoneTerm(func=mdp.bad_orientation, params={"limit_angle": 0.8})
     base_contact = DoneTerm(
         func=mdp.illegal_contact,

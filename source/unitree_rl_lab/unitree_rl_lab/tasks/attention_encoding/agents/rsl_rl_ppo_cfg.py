@@ -64,6 +64,7 @@ class BasePPORunnerCfg(RslRlOnPolicyRunnerCfg):
         lam=0.95,
         desired_kl=0.01,
         max_grad_norm=1.0,
+        # TODO: h1数据扩充配置
         # symmetry_cfg=RslRlSymmetryCfg(
         #     use_data_augmentation = True,
         #     use_mirror_loss=True,

@@ -38,6 +38,7 @@ simulation_app = app_launcher.app
 """Rest everything follows."""
 # Se2Keyboard
 from isaaclab.devices import Se2Keyboard, Se2KeyboardCfg
+from isaaclab.devices import Se2Gamepad, Se2GamepadCfg
 
 import torch
 
@@ -83,10 +84,10 @@ class H1RoughDemo:
         agent_cfg: RslRlOnPolicyRunnerCfg = cli_args.parse_rsl_rl_cfg(TASK, args_cli)
         # load the trained jit policy
         # checkpoint = get_published_pretrained_checkpoint(RL_LIBRARY, TASK)
-        checkpoint = "D:/unitree_rl_lab_reproduction/scripts/rsl_rl/logs/rsl_rl/unitree_h1_attention_encoding/2025-11-27_21-55-12/model_49999.pt"
+        checkpoint = "D:/unitree_rl_lab_attention/logs/rsl_rl/unitree_h1_attention_encoding/2025-11-27_21-55-12/model_49999.pt"
         # create envionrment
         env_cfg = RobotPlayEnvCfg()
-        env_cfg.scene.num_envs = 128
+        env_cfg.scene.num_envs = 256
         env_cfg.episode_length_s = 1000000
         env_cfg.curriculum = None
         # env_cfg.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)
@@ -101,13 +102,13 @@ class H1RoughDemo:
         self.policy = ppo_runner.get_inference_policy(device=self.device)
 
         self.create_camera()
-        self.keyboard = Se2Keyboard(Se2KeyboardCfg(
-            v_x_sensitivity = 2.,
-            v_y_sensitivity = 1.5,
-            omega_z_sensitivity = 1.
+        self.gamepad = Se2Gamepad(Se2GamepadCfg(
+            v_x_sensitivity=2.,
+            v_y_sensitivity=2.,
+            omega_z_sensitivity=2.
         ))
-        self.keyboard.add_callback("C", self._toggle_camera_cb)
-        self.keyboard.add_callback("ESCAPE", self._deselect_robot_cb)
+        self.gamepad.add_callback(carb.input.GamepadInput.A, self._toggle_camera_cb)
+        self.gamepad.add_callback(carb.input.GamepadInput.B, self._deselect_robot_cb)
 
         self.commands = torch.zeros(env_cfg.scene.num_envs, 3, device=self.device)
         self.commands[:, 0:3] = self.env.unwrapped.command_manager.get_command("base_velocity")
@@ -192,7 +193,8 @@ class H1RoughDemo:
     def process_input(self):
         # 1. 获取键盘计算出的速度 [vx, vy, omega]
         # advance() 会自动处理按键按下/松开的状态
-        vel = self.keyboard.advance().to(self.device)
+        vel = self.gamepad.advance().to(self.device)
+        print(vel)
 
         # 2. 如果当前选中了某个机器人，就把速度赋值给它
         if self._selected_id is not None:
@@ -216,6 +218,7 @@ def main():
             obs, _, _, _ = demo_h1.env.step(action)
             # overwrite command based on keyboard input
             obs["policy"][:, 9:12] = demo_h1.commands
+            # print(obs["policy"][:, 9:13])
 
 
 if __name__ == "__main__":

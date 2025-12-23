@@ -49,6 +49,7 @@ Currently supports Unitree **Go2**, **H1** and **G1-29dof** robots.
 
     ```bash
     conda activate env_isaaclab
+    pip install -e .\source\unitree_rl_lab\
     ./unitree_rl_lab.sh -i
     cd rsl_rl_attention/
     pip install -e .
