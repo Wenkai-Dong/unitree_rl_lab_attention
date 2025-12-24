@@ -6,15 +6,11 @@
 """Configuration for custom terrains."""
 
 import isaaclab.terrains as terrain_gen
+import unitree_rl_lab.tasks.attention_encoding.terrains as attention_terrains_gen
 
 from isaaclab.terrains.terrain_generator_cfg import TerrainGeneratorCfg
 
-from unitree_rl_lab.tasks.attention_encoding.terrains.attention_terrains_cfg import (
-    MeshConcentricBeamsTerrainCfg,
-    mesh_concentric_beams_terrain
-)
-
-ATTENTION_TERRAINS_CFG = TerrainGeneratorCfg(
+ATTENTION_TERRAINS_S1_CFG = TerrainGeneratorCfg(
     curriculum=True,
     size=(10.0, 10.0),
     border_width=10,
@@ -26,12 +22,6 @@ ATTENTION_TERRAINS_CFG = TerrainGeneratorCfg(
     difficulty_range=(0.0, 1.0),
     use_cache=False,
     sub_terrains={
-        # "Rough": terrain_gen.HfRandomUniformTerrainCfg(
-        #     noise_range=(0.01, 0.08),
-        #     noise_step=(0.005),
-        #     downsampled_scale=0.2,
-        #     border_width=1,
-        # ),
         "Rough":terrain_gen.HfRandomUniformTerrainCfg(
             noise_range=(0.02, 0.15),
             noise_step=0.02,
@@ -63,22 +53,15 @@ ATTENTION_TERRAINS_CFG = TerrainGeneratorCfg(
             platform_width=1.5,
             border_width=1,
         ),
-        # "Pallets": terrain_gen.MeshRailsTerrainCfg(
-        #     rail_thickness_range=(0.5,1.),
-        #     rail_height_range=(0.1,1.),
-        #     platform_width=2.,
-        # ),
-        "Pallets": MeshConcentricBeamsTerrainCfg(
-            proportion=1.0,
-            # 1. 必填：告诉它用哪个函数 (对应第二步注册的名字)
-            function=mesh_concentric_beams_terrain,
-            # 2. 基础参数
+        "Pallets": attention_terrains_gen.MeshConcentricBeamsTerrainCfg(
+            function = attention_terrains_gen.mesh_concentric_beams_terrain,
+            # 基础参数
             platform_width=1.5,
             beam_thickness=3.0,
-            # 3. 课程难度参数 (根据你的需求调整)
-            step_height_range=(0.0, 0.2),  # 难度越高，下沉越深
-            beam_width_range=(0.6, 0.1),  # 难度越高，路越窄
-            gap_width_range=(0.1, 0.8),  # 难度越高，缝隙越大
+            # 课程难度参数
+            step_height_range=(0.0, 0.25),  # 难度越高，下沉越深
+            beam_width_range=(0.5, 0.1),  # 难度越高，路越窄
+            gap_width_range=(0.1, 0.5),  # 难度越高，缝隙越大
         ),
         "Pits": terrain_gen.MeshPitTerrainCfg(
             pit_depth_range=(0.1,0.6),
@@ -90,7 +73,6 @@ ATTENTION_TERRAINS_CFG = TerrainGeneratorCfg(
             double_box=True,
             platform_width=2.,
         ),
-
         "Beams": terrain_gen.MeshStarTerrainCfg(
             num_bars=4,
             bar_width_range=(0.05,1.),
@@ -99,4 +81,80 @@ ATTENTION_TERRAINS_CFG = TerrainGeneratorCfg(
         ),
     },
 )
-"""All terrains configuration."""
+
+ATTENTION_TERRAINS_S2_CFG = TerrainGeneratorCfg(
+    curriculum=True,
+    size=(14.0, 14.0),
+    border_width=10,
+    num_rows=10,
+    num_cols=6,
+    horizontal_scale=0.1,
+    vertical_scale=0.005,
+    slope_threshold=0.75,
+    difficulty_range=(0.0, 1.0),
+    use_cache=False,
+    sub_terrains={
+        "PentagonStones": terrain_gen.trimesh.mesh_terrains_cfg.MeshRepeatedBoxesTerrainCfg(
+            abs_height_noise=(-0.5, 0.5),
+            # rel_height_noise=(1., 1.),
+            platform_width=2.,
+            platform_height=-1.,
+            object_type="box",
+            object_params_start=terrain_gen.trimesh.mesh_terrains_cfg.MeshRepeatedBoxesTerrainCfg.ObjectCfg(
+                num_objects=256,
+                height=5.,
+                size=(0.6,0.6),
+                max_yx_angle=5.,
+                degrees=True,
+            ),
+            object_params_end=terrain_gen.trimesh.mesh_terrains_cfg.MeshRepeatedBoxesTerrainCfg.ObjectCfg(
+                num_objects=512,
+                height=5.,
+                size=(0.4,0.4),
+                max_yx_angle=30.,
+                degrees=True,
+            ),
+        ),
+        "Single-columnStones": attention_terrains_gen.HfSingleColumnStonesTerrainCfg(
+            stone_height_max=0.3,
+            stone_width_range=(0.3,0.8),
+            stone_distance_range=(0.1,0.5),
+            holes_depth=-10,
+            platform_width=2.,
+            border_width=1,
+        ),
+        "NarrowPallets": attention_terrains_gen.HfNarrowPalletsTerrainCfg(
+            stone_height_max=0.3,
+            stone_length_range=(0.3, 0.8),
+            stone_width_range=(0.8, 0.8),
+            stone_distance_range=(0.1, 0.5),
+            holes_depth=-10,
+            platform_width=2.,
+            border_width=1,
+        ),
+        "ConsecutiveGaps": attention_terrains_gen.MeshConcentricBeamsTerrainCfg(
+            function = attention_terrains_gen.mesh_concentric_beams_terrain,
+            # 基础参数
+            platform_width=2.,
+            beam_thickness=3.0,
+            # 课程难度参数
+            step_height_range=(0.0, 0.2),  # 难度越高，下沉越深
+            beam_width_range=(0.6, 0.4),  # 难度越高，路越窄
+            gap_width_range=(0.5, 1.1),  # 难度越高，缝隙越大
+        ),
+        "NarrowStairs": attention_terrains_gen.MeshPyramidStairsTerrainCfg(
+            step_height_range=(0.01, 0.3),
+            step_width=0.4,
+            platform_width=0.55,
+            holes=True,
+            border_width=1,
+        ),
+        "NarrowStairsInverted": attention_terrains_gen.MeshInvertedPyramidStairsTerrainCfg(
+            step_height_range=(0.01, 0.3),
+            step_width=0.4,
+            platform_width=0.55,
+            holes=True,
+            border_width=1,
+        ),
+    },
+)

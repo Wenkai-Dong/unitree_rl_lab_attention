@@ -20,7 +20,7 @@ from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
 from unitree_rl_lab.assets.robots.unitree import UNITREE_H1_CFG as ROBOT_CFG
 from unitree_rl_lab.tasks.attention_encoding import mdp
 
-from unitree_rl_lab.tasks.attention_encoding.terrains.config.attention import ATTENTION_TERRAINS_CFG
+from unitree_rl_lab.tasks.attention_encoding.terrains.config.attention import ATTENTION_TERRAINS_S1_CFG
 
 @configclass
 class RobotSceneCfg(InteractiveSceneCfg):
@@ -30,8 +30,8 @@ class RobotSceneCfg(InteractiveSceneCfg):
     terrain = TerrainImporterCfg(
         prim_path="/World/ground",
         terrain_type="generator",  # "plane", "generator"
-        terrain_generator=ATTENTION_TERRAINS_CFG,  # None, ROUGH_TERRAINS_CFG
-        max_init_terrain_level=ATTENTION_TERRAINS_CFG.num_rows - 5,
+        terrain_generator=ATTENTION_TERRAINS_S1_CFG,  # None, ROUGH_TERRAINS_CFG
+        max_init_terrain_level=ATTENTION_TERRAINS_S1_CFG.num_rows - 5,
         collision_group=-1,
         physics_material=sim_utils.RigidBodyMaterialCfg(
             friction_combine_mode="multiply",
