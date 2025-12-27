@@ -377,4 +377,5 @@ class RobotPlayEnvCfg(RobotEnvCfg):
         self.scene.num_envs = 32
         # self.scene.terrain.terrain_generator.num_rows = 2
         # self.scene.terrain.terrain_generator.num_cols = 10
+        self.scene.terrain.max_init_terrain_level = ATTENTION_TERRAINS_S1_CFG.num_rows
         self.commands.base_velocity.ranges = self.commands.base_velocity.limit_ranges

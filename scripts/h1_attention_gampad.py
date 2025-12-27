@@ -12,7 +12,6 @@ This script demonstrates an interactive demo with the H1 rough terrain environme
     python ./scripts/play_keyboard.py
 
 """
-
 """Launch Isaac Sim Simulator first."""
 
 import argparse
@@ -56,9 +55,30 @@ from isaaclab.utils.pretrained_checkpoint import get_published_pretrained_checkp
 
 from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlVecEnvWrapper
 
-from isaaclab_tasks.manager_based.locomotion.velocity.config.h1.rough_env_cfg import H1RoughEnvCfg_PLAY
+# from isaaclab_tasks.manager_based.locomotion.velocity.config.h1.rough_env_cfg import H1RoughEnvCfg_PLAY
+from unitree_rl_lab.tasks.attention_encoding.robots.h1.attention_env_cfg_s1 import RobotPlayEnvCfg
 
-TASK = "Isaac-Velocity-Rough-H1-v0"
+import isaaclab.sim as sim_utils
+from isaaclab.markers import VisualizationMarkersCfg, VisualizationMarkers
+
+# --- 1. 定义热力图配置 (不要改库文件，直接写在这里) ---
+HEATMAP_MARKERS = {}
+for i in range(10):
+    # 计算颜色: 0=蓝 -> 9=红
+    ratio = i / 9.0
+    color = (ratio, 0.0, 1.0 - ratio)
+    # 定义球体样式
+    HEATMAP_MARKERS[f"level_{i}"] = sim_utils.SphereCfg(
+        radius=0.02,  # 球的大小
+        visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=color)
+    )
+
+# 创建配置对象
+MY_HEATMAP_CFG = VisualizationMarkersCfg(
+    prim_path="/Visuals/AttentionHeatmap",  # 在USD里的路径
+    markers=HEATMAP_MARKERS,  # 塞入我们生成的10个球
+)
+TASK = "Unitree-H1-Attention-Encoding-S1"
 RL_LIBRARY = "rsl_rl"
 
 
@@ -82,14 +102,15 @@ class H1RoughDemo:
         loads pre-trained checkpoints, and registers keyboard events."""
         agent_cfg: RslRlOnPolicyRunnerCfg = cli_args.parse_rsl_rl_cfg(TASK, args_cli)
         # load the trained jit policy
-        checkpoint = get_published_pretrained_checkpoint(RL_LIBRARY, TASK)
+        # checkpoint = get_published_pretrained_checkpoint(RL_LIBRARY, TASK)
+        checkpoint = "C:/Users/395/Desktop/train/unitree_h1_attention_encoding_s1/2025-12-24_20-18-44/model_16100.pt"
         # create envionrment
-        env_cfg = H1RoughEnvCfg_PLAY()
-        env_cfg.scene.num_envs = 25
+        env_cfg = RobotPlayEnvCfg()
+        env_cfg.scene.num_envs = 256
         env_cfg.episode_length_s = 1000000
         env_cfg.curriculum = None
-        env_cfg.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)
-        env_cfg.commands.base_velocity.ranges.heading = (-1.0, 1.0)
+        # env_cfg.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)
+        # env_cfg.commands.base_velocity.ranges.heading = (-1.0, 1.0)
         # wrap around environment for rsl-rl
         self.env = RslRlVecEnvWrapper(ManagerBasedRLEnv(cfg=env_cfg))
         self.device = self.env.unwrapped.device
@@ -101,14 +122,14 @@ class H1RoughDemo:
 
         self.create_camera()
         self.gamepad = Se2Gamepad(Se2GamepadCfg(
-            v_x_sensitivity = 1.,
-            v_y_sensitivity = 1.,
-            omega_z_sensitivity = 1.
+            v_x_sensitivity=1.5,
+            v_y_sensitivity=1.,
+            omega_z_sensitivity=1.
         ))
         self.gamepad.add_callback(carb.input.GamepadInput.A, self._toggle_camera_cb)
         self.gamepad.add_callback(carb.input.GamepadInput.B, self._deselect_robot_cb)
 
-        self.commands = torch.zeros(env_cfg.scene.num_envs, 4, device=self.device)
+        self.commands = torch.zeros(env_cfg.scene.num_envs, 3, device=self.device)
         self.commands[:, 0:3] = self.env.unwrapped.command_manager.get_command("base_velocity")
 
         self._prim_selection = omni.usd.get_context().get_selection()
@@ -199,23 +220,37 @@ class H1RoughDemo:
             # H1 的指令格式通常是 [x_vel, y_vel, z_vel, yaw_vel]
             # 对应的索引是 0, 1, 2, 3
             self.commands[self._selected_id, 0] = vel[0]  # 前进速度
-            self.commands[self._selected_id, 1] = vel[1]  # 横移速度
-            self.commands[self._selected_id, 2] = 0.0  # 竖直速度(无用)
-            self.commands[self._selected_id, 3] = vel[2]  # 转向速度(Yaw)
+            self.commands[self._selected_id, 1] = -vel[1]  # 横移速度
+            # self.commands[self._selected_id, 2] = 0.0  # 竖直速度(无用)
+            self.commands[self._selected_id, 2] = -vel[2]  # 转向速度(Yaw)
 
 def main():
     """Main function."""
     demo_h1 = H1RoughDemo()
     obs, _ = demo_h1.env.reset()
+    heatmap_visualizer = VisualizationMarkers(MY_HEATMAP_CFG)
+    scanner = demo_h1.env.unwrapped.scene["height_scanner"]
+    COLOR_SCALE = 50.0
     while simulation_app.is_running():
         # check for selected robots
         demo_h1.update_selected_object()
         demo_h1.process_input()
         with torch.inference_mode():
-            action = demo_h1.policy(obs)
+            action, attn_weights = demo_h1.policy(obs)
+            attn_weights = attn_weights.reshape(-1,11,17)
             obs, _, _, _ = demo_h1.env.step(action)
             # overwrite command based on keyboard input
-            obs[:, 9:13] = demo_h1.commands
+            obs["policy"][:, 9:12] = demo_h1.commands
+            # print(obs["policy"][:, 9:13])
+            target_id = demo_h1._selected_id if demo_h1._selected_id is not None else 0
+            points = scanner.data.ray_hits_w[target_id]
+            weights = attn_weights[target_id].flatten()
+            marker_indices = (weights * COLOR_SCALE).long()
+            marker_indices = torch.clamp(marker_indices, min=0, max=9)
+            heatmap_visualizer.visualize(
+                translations=points,
+                marker_indices=marker_indices
+            )
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ This script demonstrates an interactive demo with the H1 rough terrain environme
 """Launch Isaac Sim Simulator first."""
 
 import argparse
-import rsl_rl.cli_args as cli_args  # isort: skip
+import scripts.rsl_rl.cli_args as cli_args  # isort: skip
 
 from isaaclab.app import AppLauncher
 
@@ -57,9 +57,9 @@ from isaaclab.utils.pretrained_checkpoint import get_published_pretrained_checkp
 from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlVecEnvWrapper
 
 # from isaaclab_tasks.manager_based.locomotion.velocity.config.h1.rough_env_cfg import H1RoughEnvCfg_PLAY
-from unitree_rl_lab.tasks.attention_encoding.robots.h1.attention_env_cfg import RobotPlayEnvCfg
+from unitree_rl_lab.tasks.attention_encoding.robots.h1.attention_env_cfg_s1 import RobotPlayEnvCfg
 
-TASK = "Unitree-H1-Attention-Encoding"
+TASK = "Unitree-H1-Attention-Encoding-S1"
 RL_LIBRARY = "rsl_rl"
 
 
@@ -84,7 +84,7 @@ class H1RoughDemo:
         agent_cfg: RslRlOnPolicyRunnerCfg = cli_args.parse_rsl_rl_cfg(TASK, args_cli)
         # load the trained jit policy
         # checkpoint = get_published_pretrained_checkpoint(RL_LIBRARY, TASK)
-        checkpoint = "D:/unitree_rl_lab_attention/logs/rsl_rl/unitree_h1_attention_encoding/2025-11-27_21-55-12/model_49999.pt"
+        checkpoint = "C:/Users/395/Desktop/train/unitree_h1_attention_encoding_s1/2025-12-24_20-18-44/model_16100.pt"
         # create envionrment
         env_cfg = RobotPlayEnvCfg()
         env_cfg.scene.num_envs = 256
@@ -103,9 +103,9 @@ class H1RoughDemo:
 
         self.create_camera()
         self.gamepad = Se2Gamepad(Se2GamepadCfg(
-            v_x_sensitivity=2.,
-            v_y_sensitivity=2.,
-            omega_z_sensitivity=2.
+            v_x_sensitivity=1.5,
+            v_y_sensitivity=1.,
+            omega_z_sensitivity=1.
         ))
         self.gamepad.add_callback(carb.input.GamepadInput.A, self._toggle_camera_cb)
         self.gamepad.add_callback(carb.input.GamepadInput.B, self._deselect_robot_cb)
@@ -201,9 +201,9 @@ class H1RoughDemo:
             # H1 的指令格式通常是 [x_vel, y_vel, z_vel, yaw_vel]
             # 对应的索引是 0, 1, 2, 3
             self.commands[self._selected_id, 0] = vel[0]  # 前进速度
-            self.commands[self._selected_id, 1] = vel[1]  # 横移速度
+            self.commands[self._selected_id, 1] = -vel[1]  # 横移速度
             # self.commands[self._selected_id, 2] = 0.0  # 竖直速度(无用)
-            self.commands[self._selected_id, 2] = vel[2]  # 转向速度(Yaw)
+            self.commands[self._selected_id, 2] = -vel[2]  # 转向速度(Yaw)
 
 def main():
     """Main function."""
@@ -214,7 +214,9 @@ def main():
         demo_h1.update_selected_object()
         demo_h1.process_input()
         with torch.inference_mode():
-            action = demo_h1.policy(obs)
+            action, attn_weights = demo_h1.policy(obs)
+            attn_weights = attn_weights.reshape(-1,11,17)
+
             obs, _, _, _ = demo_h1.env.step(action)
             # overwrite command based on keyboard input
             obs["policy"][:, 9:12] = demo_h1.commands
