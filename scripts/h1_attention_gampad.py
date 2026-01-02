@@ -103,7 +103,7 @@ class H1RoughDemo:
         agent_cfg: RslRlOnPolicyRunnerCfg = cli_args.parse_rsl_rl_cfg(TASK, args_cli)
         # load the trained jit policy
         # checkpoint = get_published_pretrained_checkpoint(RL_LIBRARY, TASK)
-        checkpoint = "C:/Users/395/Desktop/train/unitree_h1_attention_encoding_s1/2025-12-24_20-18-44/model_16100.pt"
+        checkpoint = "C:/Users/395/Desktop/train/unitree_h1_attention_encoding_s1/2025-12-24_20-18-44/model_29600.pt"
         # create envionrment
         env_cfg = RobotPlayEnvCfg()
         env_cfg.scene.num_envs = 256

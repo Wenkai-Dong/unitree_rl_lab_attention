@@ -16,3 +16,18 @@ class RslRlPpoActorCriticCrossMHACfg(RslRlPpoActorCriticCfg):
     actor_cnn_cfg: dict[str, dict] | dict | None = None
 
     critic_cnn_cfg: dict[str, dict] | dict | None = None
+
+    actor_mha_cfg: dict[str, dict] | dict | None = None
+
+    critic_mha_cfg: dict[str, dict] | dict | None = None
+
+@configclass
+class RslRlPpoActorCriticShareCrossMHACfg(RslRlPpoActorCriticCfg):
+    """Configuration for the PPO actor-critic networks with recurrent layers."""
+
+    class_name: str = "ActorCriticShareCrossMHA"
+    """The policy class name. Default is ActorCriticCrossMHA."""
+
+    actor_cnn_cfg: dict[str, dict] | dict | None = None
+
+    actor_mha_cfg: dict[str, dict] | dict | None = None

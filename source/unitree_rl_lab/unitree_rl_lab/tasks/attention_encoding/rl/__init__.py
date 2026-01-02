@@ -1,2 +1,2 @@
 from .cnn import RslRlPpoActorCriticCNNCfg
-from .cross_mha import RslRlPpoActorCriticCrossMHACfg
+from .cross_mha import RslRlPpoActorCriticCrossMHACfg, RslRlPpoActorCriticShareCrossMHACfg

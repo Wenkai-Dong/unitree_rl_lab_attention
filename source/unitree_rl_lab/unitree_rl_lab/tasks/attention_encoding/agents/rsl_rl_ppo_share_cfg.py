@@ -5,7 +5,7 @@
 
 from isaaclab.utils import configclass
 from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, RslRlPpoAlgorithmCfg, RslRlSymmetryCfg
-from ..rl import RslRlPpoActorCriticCrossMHACfg, RslRlPpoActorCriticCNNCfg
+from ..rl import RslRlPpoActorCriticCrossMHACfg, RslRlPpoActorCriticCNNCfg, RslRlPpoActorCriticShareCrossMHACfg
 from ..mdp.symmetry.h1 import compute_symmetric_states
 
 @configclass
@@ -20,7 +20,7 @@ class BasePPORunnerS1Cfg(RslRlOnPolicyRunnerCfg):
     experiment_name = ""  # same as task name
     # resume = False
     empirical_normalization = False
-    policy = RslRlPpoActorCriticCrossMHACfg(
+    policy = RslRlPpoActorCriticShareCrossMHACfg(
         init_noise_std=1.0,
         actor_obs_normalization=True,
         critic_obs_normalization=True,
@@ -28,18 +28,6 @@ class BasePPORunnerS1Cfg(RslRlOnPolicyRunnerCfg):
         critic_hidden_dims=[512, 256, 128],
         activation="elu",
         actor_cnn_cfg={
-            "output_channels": [16, 61],
-            "kernel_size": 5,
-            "stride": 1,
-            "dilation": 1,
-            "padding": "zeros",
-            "norm": "none",
-            "activation": "elu",
-            "max_pool": False,
-            "global_pool": "none",
-            "flatten": False,
-        },
-        critic_cnn_cfg={
             "output_channels": [16, 61],
             "kernel_size": 5,
             "stride": 1,
@@ -61,16 +49,6 @@ class BasePPORunnerS1Cfg(RslRlOnPolicyRunnerCfg):
             "vdim": None,
             "batch_first": True,
         },
-        critic_mha_cfg={
-            "num_heads": 16,
-            "dropout": 0.0,
-            "bias": True,
-            "add_bias_kv": False,
-            "add_zero_attn": False,
-            "kdim": None,
-            "vdim": None,
-            "batch_first": True,
-        },
     )
     algorithm = RslRlPpoAlgorithmCfg(
         value_loss_coef=1.0,
@@ -78,7 +56,7 @@ class BasePPORunnerS1Cfg(RslRlOnPolicyRunnerCfg):
         clip_param=0.2,
         entropy_coef=0.005, # stage2: 0.002
         num_learning_epochs=5,
-        num_mini_batches=12,
+        num_mini_batches=3,
         learning_rate=1.0e-3,
         schedule="adaptive",
         gamma=0.99,
@@ -105,7 +83,7 @@ class BasePPORunnerS2Cfg(RslRlOnPolicyRunnerCfg):
     experiment_name = ""  # same as task name
     # resume = False
     empirical_normalization = False
-    policy = RslRlPpoActorCriticCrossMHACfg(
+    policy = RslRlPpoActorCriticShareCrossMHACfg(
         init_noise_std=1.0,
         actor_obs_normalization=True,
         critic_obs_normalization=True,
@@ -113,18 +91,6 @@ class BasePPORunnerS2Cfg(RslRlOnPolicyRunnerCfg):
         critic_hidden_dims=[512, 256, 128],
         activation="elu",
         actor_cnn_cfg={
-            "output_channels": [16, 61],
-            "kernel_size": 5,
-            "stride": 1,
-            "dilation": 1,
-            "padding": "zeros",
-            "norm": "none",
-            "activation": "elu",
-            "max_pool": False,
-            "global_pool": "none",
-            "flatten": False,
-        },
-        critic_cnn_cfg={
             "output_channels": [16, 61],
             "kernel_size": 5,
             "stride": 1,
@@ -146,16 +112,6 @@ class BasePPORunnerS2Cfg(RslRlOnPolicyRunnerCfg):
             "vdim": None,
             "batch_first": True,
         },
-        critic_mha_cfg={
-            "num_heads": 16,
-            "dropout": 0.0,
-            "bias": True,
-            "add_bias_kv": False,
-            "add_zero_attn": False,
-            "kdim": None,
-            "vdim": None,
-            "batch_first": True,
-        },
     )
     algorithm = RslRlPpoAlgorithmCfg(
         value_loss_coef=1.0,
@@ -163,7 +119,7 @@ class BasePPORunnerS2Cfg(RslRlOnPolicyRunnerCfg):
         clip_param=0.2,
         entropy_coef=0.002, # stage2: 0.002
         num_learning_epochs=5,
-        num_mini_batches=12,
+        num_mini_batches=3,
         learning_rate=1.0e-3,
         schedule="adaptive",
         gamma=0.99,
