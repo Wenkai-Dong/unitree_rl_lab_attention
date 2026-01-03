@@ -6,7 +6,7 @@
 from isaaclab.utils import configclass
 from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, RslRlPpoAlgorithmCfg, RslRlSymmetryCfg
 from ..rl import RslRlPpoActorCriticCrossMHACfg, RslRlPpoActorCriticCNNCfg
-from ..mdp.symmetry.h1 import compute_symmetric_states
+from ..mdp.symmetry.h1_v1 import compute_symmetric_states
 
 @configclass
 class BasePPORunnerS1Cfg(RslRlOnPolicyRunnerCfg):

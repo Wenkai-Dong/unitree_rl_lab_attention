@@ -6,7 +6,7 @@
 from isaaclab.utils import configclass
 from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, RslRlPpoAlgorithmCfg, RslRlSymmetryCfg
 from ..rl import RslRlPpoActorCriticCrossMHACfg, RslRlPpoActorCriticCNNCfg, RslRlPpoActorCriticShareCrossMHACfg
-from ..mdp.symmetry.h1 import compute_symmetric_states
+from ..mdp.symmetry.h1_v1 import compute_symmetric_states
 
 @configclass
 class BasePPORunnerS1Cfg(RslRlOnPolicyRunnerCfg):
@@ -14,7 +14,6 @@ class BasePPORunnerS1Cfg(RslRlOnPolicyRunnerCfg):
     max_iterations = 50000
     obs_groups = {
         "policy": ["policy", "policy_map"],
-        "critic": ["critic", "critic_map"],
     }
     save_interval = 100
     experiment_name = ""  # same as task name
@@ -23,7 +22,6 @@ class BasePPORunnerS1Cfg(RslRlOnPolicyRunnerCfg):
     policy = RslRlPpoActorCriticShareCrossMHACfg(
         init_noise_std=1.0,
         actor_obs_normalization=True,
-        critic_obs_normalization=True,
         actor_hidden_dims=[512, 256, 128],
         critic_hidden_dims=[512, 256, 128],
         activation="elu",
@@ -56,7 +54,7 @@ class BasePPORunnerS1Cfg(RslRlOnPolicyRunnerCfg):
         clip_param=0.2,
         entropy_coef=0.005, # stage2: 0.002
         num_learning_epochs=5,
-        num_mini_batches=3,
+        num_mini_batches=6,
         learning_rate=1.0e-3,
         schedule="adaptive",
         gamma=0.99,
@@ -77,7 +75,6 @@ class BasePPORunnerS2Cfg(RslRlOnPolicyRunnerCfg):
     max_iterations = 50000
     obs_groups = {
         "policy": ["policy", "policy_map"],
-        "critic": ["critic", "critic_map"],
     }
     save_interval = 100
     experiment_name = ""  # same as task name
@@ -86,7 +83,6 @@ class BasePPORunnerS2Cfg(RslRlOnPolicyRunnerCfg):
     policy = RslRlPpoActorCriticShareCrossMHACfg(
         init_noise_std=1.0,
         actor_obs_normalization=True,
-        critic_obs_normalization=True,
         actor_hidden_dims=[512, 256, 128],
         critic_hidden_dims=[512, 256, 128],
         activation="elu",
@@ -119,7 +115,7 @@ class BasePPORunnerS2Cfg(RslRlOnPolicyRunnerCfg):
         clip_param=0.2,
         entropy_coef=0.002, # stage2: 0.002
         num_learning_epochs=5,
-        num_mini_batches=3,
+        num_mini_batches=6,
         learning_rate=1.0e-3,
         schedule="adaptive",
         gamma=0.99,

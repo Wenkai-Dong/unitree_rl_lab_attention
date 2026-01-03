@@ -169,40 +169,6 @@ class ObservationsCfg:
     policy: PolicyCfg = PolicyCfg()
     policy_map: PolicyCfg_MapScans = PolicyCfg_MapScans()
 
-    @configclass
-    class CriticCfg(ObsGroup):
-        """Observations for critic group."""
-
-        base_lin_vel = ObsTerm(func=mdp.base_lin_vel, )
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, scale=0.2, )
-        projected_gravity = ObsTerm(func=mdp.projected_gravity, )
-        velocity_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
-        joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel, )
-        joint_vel_rel = ObsTerm(func=mdp.joint_vel_rel, scale=0.05, )
-        last_action = ObsTerm(func=mdp.last_action)
-
-        def __post_init__(self):
-            # self.history_length = 5
-            self.enable_corruption = False
-            self.concatenate_terms = True
-
-    @configclass
-    class CriticCfg_MapScans(ObsGroup):
-        """Observations for critic group."""
-        height_scanner = ObsTerm(func=mdp.elevation_mapping,
-                                 params={"sensor_cfg": SceneEntityCfg("height_scanner")},
-                                 clip=(-5.0, 5.0),
-                                 )
-
-        def __post_init__(self):
-            # self.history_length = 5
-            self.enable_corruption = False
-            self.concatenate_terms = True
-
-    # privileged observations
-    critic: CriticCfg = CriticCfg()
-    critic_map: CriticCfg_MapScans = CriticCfg_MapScans()
-
 
 @configclass
 class RewardsCfg:
