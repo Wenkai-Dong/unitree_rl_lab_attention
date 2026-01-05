@@ -14,6 +14,7 @@ class BasePPORunnerS1Cfg(RslRlOnPolicyRunnerCfg):
     max_iterations = 50000
     obs_groups = {
         "policy": ["policy", "policy_map"],
+        "critic": ["critic", "critic_map"],
     }
     save_interval = 100
     experiment_name = ""  # same as task name
@@ -22,6 +23,7 @@ class BasePPORunnerS1Cfg(RslRlOnPolicyRunnerCfg):
     policy = RslRlPpoActorCriticShareCrossMHACfg(
         init_noise_std=1.0,
         actor_obs_normalization=True,
+        critic_obs_normalization=True,
         actor_hidden_dims=[512, 256, 128],
         critic_hidden_dims=[512, 256, 128],
         activation="elu",
@@ -31,7 +33,7 @@ class BasePPORunnerS1Cfg(RslRlOnPolicyRunnerCfg):
             "stride": 1,
             "dilation": 1,
             "padding": "zeros",
-            "norm": "none",
+            "norm": "layer",
             "activation": "elu",
             "max_pool": False,
             "global_pool": "none",
@@ -75,6 +77,7 @@ class BasePPORunnerS2Cfg(RslRlOnPolicyRunnerCfg):
     max_iterations = 50000
     obs_groups = {
         "policy": ["policy", "policy_map"],
+        "critic": ["critic", "critic_map"],
     }
     save_interval = 100
     experiment_name = ""  # same as task name
@@ -83,6 +86,7 @@ class BasePPORunnerS2Cfg(RslRlOnPolicyRunnerCfg):
     policy = RslRlPpoActorCriticShareCrossMHACfg(
         init_noise_std=1.0,
         actor_obs_normalization=True,
+        critic_obs_normalization=True,
         actor_hidden_dims=[512, 256, 128],
         critic_hidden_dims=[512, 256, 128],
         activation="elu",
