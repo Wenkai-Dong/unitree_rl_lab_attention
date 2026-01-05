@@ -102,20 +102,17 @@ class EventCfg:
 class CommandsCfg:
     """Command specifications for the MDP."""
 
-    base_velocity = mdp.UniformLevelVelocityCommandCfg(
+    base_velocity = mdp.UniformVelocityCommandCfg(
         asset_name="robot",
         heading_command=True,
         heading_control_stiffness=1.,
         rel_standing_envs=0.02,
         rel_heading_envs=1.0,
         ranges=mdp.UniformLevelVelocityCommandCfg.Ranges(
-            lin_vel_x=(-0.3, 0.5), lin_vel_y=(-0.3, 0.3), ang_vel_z=(-0.3, 0.3), heading=(-math.pi, math.pi)
+            lin_vel_x=(-1., 1.5), lin_vel_y=(-1., 1.), ang_vel_z=(-1., 1.), heading=(-math.pi, math.pi)
         ),
         resampling_time_range=(8.0, 10.0),
         debug_vis=True,
-        limit_ranges=mdp.UniformLevelVelocityCommandCfg.Ranges(
-            lin_vel_x=(-1., 1.5), lin_vel_y=(-1., 1.), ang_vel_z=(-1., 1.), heading=(-math.pi, math.pi)
-        ),
     )
 
 
@@ -328,7 +325,7 @@ class CurriculumCfg:
     """Curriculum terms for the MDP."""
 
     terrain_levels = CurrTerm(func=mdp.attention_terrain_levels)
-    lin_vel_cmd_levels = CurrTerm(mdp.lin_vel_cmd_levels)
+    # lin_vel_cmd_levels = CurrTerm(mdp.lin_vel_cmd_levels)
 
 
 @configclass
