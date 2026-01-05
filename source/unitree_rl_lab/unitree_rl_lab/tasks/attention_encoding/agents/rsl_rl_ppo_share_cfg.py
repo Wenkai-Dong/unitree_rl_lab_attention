@@ -19,7 +19,6 @@ class BasePPORunnerS1Cfg(RslRlOnPolicyRunnerCfg):
     save_interval = 100
     experiment_name = ""  # same as task name
     # resume = False
-    empirical_normalization = False
     policy = RslRlPpoActorCriticShareCrossMHACfg(
         init_noise_std=1.0,
         actor_obs_normalization=True,
@@ -82,7 +81,6 @@ class BasePPORunnerS2Cfg(RslRlOnPolicyRunnerCfg):
     save_interval = 100
     experiment_name = ""  # same as task name
     # resume = False
-    empirical_normalization = False
     policy = RslRlPpoActorCriticShareCrossMHACfg(
         init_noise_std=1.0,
         actor_obs_normalization=True,
@@ -96,7 +94,7 @@ class BasePPORunnerS2Cfg(RslRlOnPolicyRunnerCfg):
             "stride": 1,
             "dilation": 1,
             "padding": "zeros",
-            "norm": "none",
+            "norm": "layer",
             "activation": "elu",
             "max_pool": False,
             "global_pool": "none",
