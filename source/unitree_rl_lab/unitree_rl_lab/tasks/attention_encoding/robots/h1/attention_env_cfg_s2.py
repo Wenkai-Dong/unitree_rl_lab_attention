@@ -161,7 +161,7 @@ class CommandsCfg:
         heading_control_stiffness=1.,
         rel_standing_envs=0.02,
         rel_heading_envs=1.0,
-        ranges=mdp.UniformLevelVelocityCommandCfg.Ranges(
+        ranges=mdp.UniformVelocityCommandCfg.Ranges(
             lin_vel_x=(-1., 1.5), lin_vel_y=(-1., 1.), ang_vel_z=(-1., 1.), heading=(-math.pi, math.pi)
         ),
         resampling_time_range=(8.0, 10.0),
