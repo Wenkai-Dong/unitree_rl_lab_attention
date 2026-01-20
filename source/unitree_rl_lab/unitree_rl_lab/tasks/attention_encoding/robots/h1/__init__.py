@@ -29,6 +29,7 @@ gym.register(
     kwargs={
         "env_cfg_entry_point": f"{__name__}.attention_env_cfg_s1:RobotEnvCfg",
         "play_env_cfg_entry_point": f"{__name__}.attention_env_cfg_s1:RobotPlayEnvCfg",
+        "eval_env_cfg_entry_point": f"{__name__}.attention_env_cfg_eval:RobotPlayEnvCfg",
         "rsl_rl_cfg_entry_point": f"unitree_rl_lab.tasks.attention_encoding.agents.rsl_rl_ppo_share_cfg:BasePPORunnerS1Cfg",
     },
 )

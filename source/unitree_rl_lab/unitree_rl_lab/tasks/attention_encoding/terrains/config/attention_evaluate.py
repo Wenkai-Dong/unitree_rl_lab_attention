@@ -10,7 +10,7 @@ import unitree_rl_lab.tasks.attention_encoding.terrains as attention_terrains_ge
 
 from isaaclab.terrains.terrain_generator_cfg import TerrainGeneratorCfg
 
-ATTENTION_TERRAINS_S1_CFG = TerrainGeneratorCfg(
+ATTENTION_EVALUATE_TERRAINS_S1_CFG = TerrainGeneratorCfg(
     curriculum=True,
     size=(10.0, 10.0),
     border_width=10,
@@ -19,10 +19,10 @@ ATTENTION_TERRAINS_S1_CFG = TerrainGeneratorCfg(
     horizontal_scale=0.1,
     vertical_scale=0.005,
     slope_threshold=0.75,
-    difficulty_range=(0.0, 1.0),
+    difficulty_range=(1.0, 1.0),
     use_cache=False,
     sub_terrains={
-        "Rough":terrain_gen.HfRandomUniformTerrainCfg(
+        "Rough": terrain_gen.HfRandomUniformTerrainCfg(
             noise_range=(0.02, 0.15),
             noise_step=0.02,
             border_width=1.
@@ -42,19 +42,19 @@ ATTENTION_TERRAINS_S1_CFG = TerrainGeneratorCfg(
             border_width=1,
         ),
         "Gaps": terrain_gen.MeshGapTerrainCfg(
-            gap_width_range=(0.1,0.8),
+            gap_width_range=(0.1, 0.8),
             platform_width=2.,
         ),
         "GridStones": terrain_gen.HfSteppingStonesTerrainCfg(
             stone_height_max=0.2,
-            stone_width_range=(0.2,0.8),
-            stone_distance_range=(0.05,0.4),
+            stone_width_range=(0.2, 0.8),
+            stone_distance_range=(0.05, 0.4),
             holes_depth=-10,
             platform_width=1.5,
             border_width=1,
         ),
         "Pallets": attention_terrains_gen.MeshConcentricBeamsTerrainCfg(
-            function = attention_terrains_gen.mesh_concentric_beams_terrain,
+            function=attention_terrains_gen.mesh_concentric_beams_terrain,
             # 基础参数
             platform_width=1.5,
             beam_thickness=3.0,
@@ -64,19 +64,19 @@ ATTENTION_TERRAINS_S1_CFG = TerrainGeneratorCfg(
             gap_width_range=(0.1, 0.5),  # 难度越高，缝隙越大
         ),
         "Pits": terrain_gen.MeshPitTerrainCfg(
-            pit_depth_range=(0.1,0.5),
+            pit_depth_range=(0.1, 0.5),
             double_pit=True,
             platform_width=2.,
         ),
         "PitsInverted": terrain_gen.MeshBoxTerrainCfg(
-            box_height_range=(0.1,0.7),
+            box_height_range=(0.1, 0.7),
             double_box=True,
             platform_width=2.,
         ),
         "Beams": terrain_gen.MeshStarTerrainCfg(
             num_bars=4,
-            bar_width_range=(0.15,1.),
-            bar_height_range=(5.,5.),
+            bar_width_range=(0.15, 1.),
+            bar_height_range=(5., 5.),
             platform_width=2.,
         ),
     },

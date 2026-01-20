@@ -42,12 +42,12 @@ ATTENTION_TERRAINS_S1_CFG = TerrainGeneratorCfg(
             border_width=1,
         ),
         "Gaps": terrain_gen.MeshGapTerrainCfg(
-            gap_width_range=(0.1,0.8),
+            gap_width_range=(0.1,1.1),
             platform_width=2.,
         ),
         "GridStones": terrain_gen.HfSteppingStonesTerrainCfg(
             stone_height_max=0.2,
-            stone_width_range=(0.2,0.8),
+            stone_width_range=(0.3,0.8),
             stone_distance_range=(0.05,0.4),
             holes_depth=-10,
             platform_width=1.5,
@@ -64,7 +64,7 @@ ATTENTION_TERRAINS_S1_CFG = TerrainGeneratorCfg(
             gap_width_range=(0.1, 0.5),  # 难度越高，缝隙越大
         ),
         "Pits": terrain_gen.MeshPitTerrainCfg(
-            pit_depth_range=(0.1,0.5),
+            pit_depth_range=(0.1,0.6),
             double_pit=True,
             platform_width=2.,
         ),
@@ -75,7 +75,7 @@ ATTENTION_TERRAINS_S1_CFG = TerrainGeneratorCfg(
         ),
         "Beams": terrain_gen.MeshStarTerrainCfg(
             num_bars=4,
-            bar_width_range=(0.15,1.),
+            bar_width_range=(0.05,1.),
             bar_height_range=(5.,5.),
             platform_width=2.,
         ),

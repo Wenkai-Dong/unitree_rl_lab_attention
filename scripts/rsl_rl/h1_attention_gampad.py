@@ -78,7 +78,7 @@ MY_HEATMAP_CFG = VisualizationMarkersCfg(
     prim_path="/Visuals/AttentionHeatmap",  # 在USD里的路径
     markers=HEATMAP_MARKERS,  # 塞入我们生成的10个球
 )
-TASK = "Unitree-H1-Attention-Encoding-S1"
+TASK = "Unitree-H1-Attention-Encoding-S1-V1"
 RL_LIBRARY = "rsl_rl"
 
 
@@ -103,7 +103,7 @@ class H1RoughDemo:
         agent_cfg: RslRlOnPolicyRunnerCfg = cli_args.parse_rsl_rl_cfg(TASK, args_cli)
         # load the trained jit policy
         # checkpoint = get_published_pretrained_checkpoint(RL_LIBRARY, TASK)
-        checkpoint = "C:/Users/395/Desktop/train/unitree_h1_attention_encoding_s1/2025-12-24_20-18-44/model_29600.pt"
+        checkpoint = "D:/unitree_rl_lab_attention/logs/rsl_rl/unitree_h1_attention_encoding_s1_v1/2026-1-1_20-18-44/model_18000.pt"
         # create envionrment
         env_cfg = RobotPlayEnvCfg()
         env_cfg.scene.num_envs = 256
@@ -136,6 +136,10 @@ class H1RoughDemo:
         self._selected_id = None
         self._previous_selected_id = None
         self._camera_local_transform = torch.tensor([-2.5, 0.0, 0.8], device=self.device)
+        # 第一人称
+        self.camera_mode = 0
+        robot = self.env.unwrapped.scene["robot"]
+        self.fpv_link_idx = robot.find_bodies("torso_link")
 
     def create_camera(self):
         """Creates a camera to be used for third-person view."""

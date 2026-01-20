@@ -22,7 +22,6 @@ from unitree_rl_lab.assets.robots.unitree import UNITREE_H1_CFG as ROBOT_CFG
 from unitree_rl_lab.tasks.attention_encoding import mdp
 
 from unitree_rl_lab.tasks.attention_encoding.terrains.config.attention import ATTENTION_TERRAINS_S2_CFG
-from warp.examples.benchmarks.benchmark_interop_paddle import params
 
 
 @configclass
@@ -433,4 +432,3 @@ class RobotPlayEnvCfg(RobotEnvCfg):
         self.scene.num_envs = 32
         # self.scene.terrain.terrain_generator.num_rows = 2
         # self.scene.terrain.terrain_generator.num_cols = 10
-        self.commands.base_velocity.ranges = self.commands.base_velocity.limit_ranges

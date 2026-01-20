@@ -16,11 +16,14 @@ from isaaclab.terrains import TerrainImporterCfg
 from isaaclab.utils import configclass
 from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
 from isaaclab.utils.noise import AdditiveUniformNoiseCfg as Unoise
+from isaaclab.utils.noise import AdditiveGaussianNoiseCfg as Gnoise
 
 from unitree_rl_lab.assets.robots.unitree import UNITREE_H1_CFG as ROBOT_CFG
 from unitree_rl_lab.tasks.attention_encoding import mdp
 
-from unitree_rl_lab.tasks.attention_encoding.terrains.config.attention import ATTENTION_TERRAINS_S1_CFG
+from unitree_rl_lab.tasks.attention_encoding.terrains.config.attention import ATTENTION_TERRAINS_S2_CFG
+from warp.examples.benchmarks.benchmark_interop_paddle import params
+
 
 @configclass
 class RobotSceneCfg(InteractiveSceneCfg):
@@ -30,8 +33,8 @@ class RobotSceneCfg(InteractiveSceneCfg):
     terrain = TerrainImporterCfg(
         prim_path="/World/ground",
         terrain_type="generator",  # "plane", "generator"
-        terrain_generator=ATTENTION_TERRAINS_S1_CFG,  # None, ROUGH_TERRAINS_CFG
-        max_init_terrain_level=ATTENTION_TERRAINS_S1_CFG.num_rows - 5,
+        terrain_generator=ATTENTION_TERRAINS_S2_CFG,  # None, ROUGH_TERRAINS_CFG
+        max_init_terrain_level=ATTENTION_TERRAINS_S2_CFG.num_rows - 5,
         collision_group=-1,
         physics_material=sim_utils.RigidBodyMaterialCfg(
             friction_combine_mode="multiply",
@@ -59,7 +62,7 @@ class RobotSceneCfg(InteractiveSceneCfg):
         mesh_prim_paths=["/World/ground"],
         update_period=0.0,
         history_length=0,
-        drift_range=(0.0, 0.0),
+        drift_range=(-0.1, 0.1),
         ray_cast_drift_range={
             "x": (0.0, 0.0),
             "y": (0.0, 0.0),
@@ -81,11 +84,44 @@ class RobotSceneCfg(InteractiveSceneCfg):
 class EventCfg:
     """Configuration for events."""
 
+    # reset
+    physics_material = EventTerm(
+        func=mdp.randomize_rigid_body_material,
+        mode="reset",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*"),
+            "static_friction_range": (0.3, 1.0),
+            "dynamic_friction_range": (0.3, 1.0),
+            "restitution_range": (0.0, 0.0),
+            "num_buckets": 64,
+        },
+    )
+
+    add_base_mass = EventTerm(
+        func=mdp.randomize_rigid_body_mass,
+        mode="reset",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", body_names="torso_link"),
+            "mass_distribution_params": (-1.0, 3.0),
+            "operation": "add",
+        },
+    )
+
+    # base_external_force_torque = EventTerm(
+    #     func=mdp.apply_external_force_torque,
+    #     mode="reset",
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", body_names="torso_link"),
+    #         "force_range": (0.0, 0.0),
+    #         "torque_range": (-0.0, 0.0),
+    #     },
+    # )
+
     reset_base = EventTerm(
         func=mdp.reset_root_state_uniform,
         mode="reset",
         params={
-            "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},
+            "pose_range": {"x": (-0.1, 0.1), "y": (-0.1, 0.1), "yaw": (-3.14, 3.14)},
             "velocity_range": {
                 "x": (0.0, 0.0),
                 "y": (0.0, 0.0),
@@ -95,6 +131,23 @@ class EventCfg:
                 "yaw": (0.0, 0.0),
             },
         },
+    )
+
+    reset_robot_joints = EventTerm(
+        func=mdp.reset_joints_by_scale,
+        mode="reset",
+        params={
+            "position_range": (0.5, 1.5),
+            "velocity_range": (0.0, 0.0),
+        },
+    )
+
+    # interval
+    push_robot = EventTerm(
+        func=mdp.push_by_setting_velocity,
+        mode="interval",
+        interval_range_s=(4.0, 6.0),
+        params={"velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)}},
     )
 
 
@@ -134,12 +187,12 @@ class ObservationsCfg:
         """Observations for policy group."""
 
         # observation terms (order preserved)
-        base_lin_vel = ObsTerm(func=mdp.base_lin_vel,)
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, scale=0.2,)
-        projected_gravity = ObsTerm(func=mdp.projected_gravity,)
+        base_lin_vel = ObsTerm(func=mdp.base_lin_vel, noise=Unoise(n_min=-0.2, n_max=0.2))
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, scale=0.2, noise=Unoise(n_min=-0.2, n_max=0.2))
+        projected_gravity = ObsTerm(func=mdp.projected_gravity, noise=Unoise(n_min=-0.05, n_max=0.05))
         velocity_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
-        joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel,)
-        joint_vel_rel = ObsTerm(func=mdp.joint_vel_rel, scale=0.05,)
+        joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel, noise=Unoise(n_min=-0.01, n_max=0.01))
+        joint_vel_rel = ObsTerm(func=mdp.joint_vel_rel, scale=0.05, noise=Unoise(n_min=-1.5, n_max=1.5))
         last_action = ObsTerm(func=mdp.last_action)
 
         def __post_init__(self):
@@ -155,6 +208,7 @@ class ObservationsCfg:
         height_scanner = ObsTerm(func=mdp.elevation_mapping,
             params={"sensor_cfg": SceneEntityCfg("height_scanner")},
             clip=(-5.0, 5.0),
+            noise=Gnoise(mean=0.0, std=0.02),
         )
 
         def __post_init__(self):
@@ -168,15 +222,14 @@ class ObservationsCfg:
 
     @configclass
     class CriticCfg(ObsGroup):
-        """Observations for policy group."""
+        """Observations for critic group."""
 
-        # observation terms (order preserved)
-        base_lin_vel = ObsTerm(func=mdp.base_lin_vel,)
-        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, scale=0.2,)
-        projected_gravity = ObsTerm(func=mdp.projected_gravity,)
+        base_lin_vel = ObsTerm(func=mdp.base_lin_vel, )
+        base_ang_vel = ObsTerm(func=mdp.base_ang_vel, scale=0.2, )
+        projected_gravity = ObsTerm(func=mdp.projected_gravity, )
         velocity_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
-        joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel,)
-        joint_vel_rel = ObsTerm(func=mdp.joint_vel_rel, scale=0.05,)
+        joint_pos_rel = ObsTerm(func=mdp.joint_pos_rel, )
+        joint_vel_rel = ObsTerm(func=mdp.joint_vel_rel, scale=0.05, )
         last_action = ObsTerm(func=mdp.last_action)
 
         def __post_init__(self):
@@ -186,20 +239,18 @@ class ObservationsCfg:
 
     @configclass
     class CriticCfg_MapScans(ObsGroup):
-        """Observations for policy group."""
-
-        # observation terms (order preserved)
+        """Observations for critic group."""
         height_scanner = ObsTerm(func=mdp.elevation_mapping,
-            params={"sensor_cfg": SceneEntityCfg("height_scanner")},
-            clip=(-5.0, 5.0),
-        )
+                                 params={"sensor_cfg": SceneEntityCfg("height_scanner")},
+                                 clip=(-5.0, 5.0),
+                                 )
 
         def __post_init__(self):
             # self.history_length = 5
             self.enable_corruption = False
             self.concatenate_terms = True
 
-    # observation groups
+    # privileged observations
     critic: CriticCfg = CriticCfg()
     critic_map: CriticCfg_MapScans = CriticCfg_MapScans()
 
@@ -296,6 +347,10 @@ class RewardsCfg:
             )
         }
     )
+    standing_joint_velocity_penalty = RewTerm(
+        func=mdp.stand_still_velocity,
+        weight=-0.2,
+    )
 
 
 @configclass
@@ -312,7 +367,8 @@ class TerminationsCfg:
                 "contact_forces",
                 body_names=[
                     "torso_link",
-                    "pelvis"
+                    "pelvis",
+                    ".*shoulder.*",
                 ],
             ),
             "threshold": 1.0
@@ -377,4 +433,4 @@ class RobotPlayEnvCfg(RobotEnvCfg):
         self.scene.num_envs = 32
         # self.scene.terrain.terrain_generator.num_rows = 2
         # self.scene.terrain.terrain_generator.num_cols = 10
-        self.scene.terrain.max_init_terrain_level = ATTENTION_TERRAINS_S1_CFG.num_rows
+        self.commands.base_velocity.ranges = self.commands.base_velocity.limit_ranges
