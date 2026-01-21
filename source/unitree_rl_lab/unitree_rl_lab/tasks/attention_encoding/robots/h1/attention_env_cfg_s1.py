@@ -31,7 +31,7 @@ class RobotSceneCfg(InteractiveSceneCfg):
         prim_path="/World/ground",
         terrain_type="generator",  # "plane", "generator"
         terrain_generator=ATTENTION_TERRAINS_S1_CFG,  # None, ROUGH_TERRAINS_CFG
-        max_init_terrain_level=ATTENTION_TERRAINS_S1_CFG.num_rows - 5,
+        max_init_terrain_level=0,
         collision_group=-1,
         physics_material=sim_utils.RigidBodyMaterialCfg(
             friction_combine_mode="multiply",
